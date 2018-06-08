@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Server</string>
   </property>
-  <widget class="QListView" name="listView">
+  <widget class="QListWidget" name="listWidget">
    <property name="geometry">
     <rect>
      <x>30</x>

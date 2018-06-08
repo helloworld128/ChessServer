@@ -19,14 +19,27 @@ public:
 
 private slots:
     void newConnection();
-    void readData();
+    void processData();
     void deleteConnection();
 
 private:
     Ui::Server *ui;
+    class Game;
+    void print(QString text);
     QTcpServer* server = nullptr;
-    QList<QTcpSocket*> connections;
-    QStringList data;
+    QMap<QTcpSocket*, Game*> connections;
+    QVector<Game*> gameList;
+};
+
+class Server::Game{
+public:
+    static int count;
+    QTcpSocket* otherSocket(QTcpSocket* socket);
+    int type;
+    int uid;
+    QTcpSocket* socket[2] = {nullptr, nullptr};
+    QString name[2];
+    bool oneReady = false;
 };
 
 #endif // SERVER_H
