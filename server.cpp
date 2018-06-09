@@ -119,7 +119,8 @@ void Server::processData(){
         QString text;
         in >> text;
         out << QChar('t') << text;
-        s->write(ba);
+        if (connections[s]->otherSocket(s) != nullptr)
+        connections[s]->otherSocket(s)->write(ba);
         break;
     }
     default:
