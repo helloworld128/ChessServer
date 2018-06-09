@@ -118,7 +118,8 @@ void Server::processData(){
     {
         QString text;
         in >> text;
-        out << QChar('t') << QString(" test");
+        out << QChar('t') << text;
+        connections[s]->otherSocket(s)->write(ba);
         break;
     }
     default:
