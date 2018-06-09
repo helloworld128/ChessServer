@@ -114,63 +114,17 @@ void Server::processData(){
         gameList.removeOne(connections[s]);
         break;
     }
+    case 't':
+    {
+        QString text;
+        in >> text;
+        out << QChar('t') << QString(" test");
+        break;
+    }
     default:
         print("Unknown command!");
         break;
     }
-    //    QString c; int i;QChar b;
-    //    in >> c >> i >> b;
-    //    print(content);
-    //    auto content = content.data();
-    //    switch (content[0]){
-    //    case 'g':
-    //    {
-    //        int n = gameList.size();
-    //        char* text = new char[dataSize * n + 1];
-    //        text[0] = 'g';
-
-    //        break;
-    //    }
-    //    case 'r': case 'p':
-    //        connections[s]->otherSocket(s)->write(content);
-    //        break;
-    //    case 'j':
-    //    {
-    //        int id = 1000 * (content[1] - '0') + 100 * (content[2] - '0')
-    //                + 10 * (content[3] - '0') + (content[4] - '0');
-    //        char* name = content + 5;
-    //        foreach (auto game, gameList)
-    //        {
-    //            if (game.uid == id){
-    //                char tmp[12];
-    //                tmp[0] = 'e'; strcpy(tmp + 1, name);
-    //                if (game.socket_1 == nullptr){
-    //                    game.socket_1 = s;
-    //                    game.name_1 = name;
-    //                    game.socket_2->write(tmp);
-    //                }
-    //                else{
-    //                    game.socket_2 = s;
-    //                    game.name_2 = name;
-    //                    game.socket_1->write(tmp);
-    //                }
-    //            }
-    //            break;
-    //        }
-    //        break;
-    //    }
-    //    case 'l':
-    //        break;
-    //    case 'c':
-    //    {
-    //        Game* game = new Game;
-
-    //        break;
-    //    }
-    //    default:
-    //        print("unknown command!");
-    //        break;
-    //    }
 }
 
 void Server::deleteConnection(){
