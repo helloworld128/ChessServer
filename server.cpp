@@ -100,12 +100,14 @@ void Server::processData(){
         connections[s]->otherSocket(s)->write(ba);
         break;
     }
-    case 'l':
+    case 'q':
     {
         Game* g = connections[s];
         if (g == nullptr) break;
-        out << QChar('l');
-        g->otherSocket(s)->write(ba);
+        if (g->otherSocket(s) != nullptr){
+            out << QChar('q');
+            g->otherSocket(s)->write(ba);
+        }
         connections[g->socket[0]] = nullptr;
         connections[g->socket[1]] = nullptr;
         delete g;
