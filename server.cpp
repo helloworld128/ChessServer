@@ -41,9 +41,6 @@ void Server::processData(){
     print(t);
     char type = t.toLatin1();
     switch(type){
-    case 's':
-
-        break;
     case 'g':
         out << QChar('g');
         out << gameList.size();
@@ -103,15 +100,18 @@ void Server::processData(){
         connections[s]->otherSocket(s)->write(ba);
         break;
     }
-    case 'l':
+    case 'q':
     {
-        out << QChar('l');
         Game* g = connections[s];
-        g->otherSocket(s)->write(ba);
+        if (g == nullptr) break;
+        if (g->otherSocket(s) != nullptr){
+            out << QChar('q');
+            g->otherSocket(s)->write(ba);
+        }
         connections[g->socket[0]] = nullptr;
         connections[g->socket[1]] = nullptr;
-        delete connections[s];
-        gameList.removeOne(connections[s]);
+        delete g;
+        gameList.removeOne(g);
         break;
     }
     case 't':
