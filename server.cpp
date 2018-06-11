@@ -78,7 +78,12 @@ void Server::processData(){
     case 'p':
     {
         int x, y;
-        in >> x >> y;
+        QChar f('a');
+        in >> x >> y >> f;
+        //after a client sends a 'p'(put), it will soon check whether the game is finished, and
+        //if so, it will send an 'f'. The interval is so short that the server can't recognize them as
+        //seperate messages.
+        if (f.toLatin1() == 'f') connections[s]->oneReady = false;
         out << QChar('p') << x << y;
         connections[s]->otherSocket(s)->write(ba);
         break;
@@ -116,12 +121,16 @@ void Server::processData(){
     }
     case 't':
     {
-        QString text;
-        in >> text;
-        out << QChar('t') << text;
-        s->write(ba);
+        if (connections[s]->otherSocket(s) == nullptr) break;
+        QString name, text;
+        in >> name >> text;
+        out << QChar('t') << name << text;
+        connections[s]->otherSocket(s)->write(ba);
         break;
     }
+    case 'f':
+        connections[s]->oneReady = false;
+        break;
     default:
         print("Unknown command!");
         break;
