@@ -41,9 +41,6 @@ void Server::processData(){
     print(t);
     char type = t.toLatin1();
     switch(type){
-    case 's':
-
-        break;
     case 'g':
         out << QChar('g');
         out << gameList.size();
@@ -81,6 +78,19 @@ void Server::processData(){
     case 'p':
     {
         int x, y;
+        QChar f('a');
+        in >> x >> y >> f;
+        //after a client sends a 'p'(put), it will soon check whether the game is finished, and
+        //if so, it will send an 'f'. The interval is so short that the server can't recognize them as
+        //seperate messages.
+        if (f.toLatin1() == 'f') connections[s]->oneReady = false;
+        out << QChar('p') << x << y;
+        connections[s]->otherSocket(s)->write(ba);
+        break;
+    }
+    case 'w':
+    {
+        int x, y;
         in >> x >> y;
         out << QChar('p') << x << y;
         connections[s]->otherSocket(s)->write(ba);
@@ -103,26 +113,32 @@ void Server::processData(){
         connections[s]->otherSocket(s)->write(ba);
         break;
     }
-    case 'l':
+    case 'q':
     {
-        out << QChar('l');
         Game* g = connections[s];
-        g->otherSocket(s)->write(ba);
+        if (g == nullptr) break;
+        if (g->otherSocket(s) != nullptr){
+            out << QChar('q');
+            g->otherSocket(s)->write(ba);
+        }
         connections[g->socket[0]] = nullptr;
         connections[g->socket[1]] = nullptr;
-        delete connections[s];
-        gameList.removeOne(connections[s]);
+        delete g;
+        gameList.removeOne(g);
         break;
     }
     case 't':
     {
-        QString text;
-        in >> text;
-        out << QChar('t') << text;
-        if (connections[s]->otherSocket(s) != nullptr)
+        if (connections[s]->otherSocket(s) == nullptr) break;
+        QString name, text;
+        in >> name >> text;
+        out << QChar('t') << name << text;
         connections[s]->otherSocket(s)->write(ba);
         break;
     }
+    case 'f':
+        connections[s]->oneReady = false;
+        break;
     default:
         print("Unknown command!");
         break;
