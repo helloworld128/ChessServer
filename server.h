@@ -33,6 +33,7 @@ private:
 
 class Server::Game{
 public:
+    QVector<QTcpSocket*> spectators;
     static int count;
     QTcpSocket* otherSocket(QTcpSocket* socket);
     int type;

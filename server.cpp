@@ -86,14 +86,31 @@ void Server::processData(){
         if (f.toLatin1() == 'f') connections[s]->oneReady = false;
         out << QChar('p') << x << y;
         connections[s]->otherSocket(s)->write(ba);
+        foreach (QTcpSocket* sock, connections[s]->spectators) {
+            sock->write(ba);
+        }
         break;
     }
-    case 'w':
+    case 'w'://watch
     {
-        int x, y;
-        in >> x >> y;
-        out << QChar('p') << x << y;
-        connections[s]->otherSocket(s)->write(ba);
+        int id;
+        in >> id;
+        foreach (Game* g, gameList){
+            if (g->uid == id){
+                connections[s] = g;
+                g->spectators.push_back(s);
+                out << QChar('z');
+                g->socket[0]->write(ba);
+                break;
+            }
+        }
+        break;
+    }
+    case 'z':
+    {
+        foreach (QTcpSocket* sock, connections[s]->spectators){
+            sock->write(content);
+        }
         break;
     }
     case 'j':
@@ -116,6 +133,8 @@ void Server::processData(){
     case 'q':
     {
         Game* g = connections[s];
+        foreach (auto sock, connections[s]->spectators)
+            if (s == sock) return;
         if (g == nullptr) break;
         if (g->otherSocket(s) != nullptr){
             out << QChar('q');
