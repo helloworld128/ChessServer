@@ -69,6 +69,8 @@ void Server::processData(){
             out << QChar('s');
             s->write(ba);
             g->otherSocket(s)->write(ba);
+            foreach (QTcpSocket* sock, g->spectators)
+                sock->write(ba);
         }
         else{
             g->oneReady = true;
@@ -83,12 +85,12 @@ void Server::processData(){
         //after a client sends a 'p'(put), it will soon check whether the game is finished, and
         //if so, it will send an 'f'. The interval is so short that the server can't recognize them as
         //seperate messages.
+        foreach (QTcpSocket* sock, connections[s]->spectators)
+            if (sock == s) return;
         if (f.toLatin1() == 'f') connections[s]->oneReady = false;
         out << QChar('p') << x << y;
         connections[s]->otherSocket(s)->write(ba);
-        foreach (QTcpSocket* sock, connections[s]->spectators) {
-            sock->write(ba);
-        }
+        for (auto sock : connections[s]->spectators) sock->write(ba);
         break;
     }
     case 'w'://watch
@@ -132,18 +134,7 @@ void Server::processData(){
     }
     case 'q':
     {
-        Game* g = connections[s];
-        foreach (auto sock, connections[s]->spectators)
-            if (s == sock) return;
-        if (g == nullptr) break;
-        if (g->otherSocket(s) != nullptr){
-            out << QChar('q');
-            g->otherSocket(s)->write(ba);
-        }
-        connections[g->socket[0]] = nullptr;
-        connections[g->socket[1]] = nullptr;
-        delete g;
-        gameList.removeOne(g);
+        removeGame(s);
         break;
     }
     case 'u':
@@ -178,12 +169,36 @@ void Server::processData(){
 
 void Server::deleteConnection(){
     auto s = dynamic_cast<QTcpSocket*>(sender());
+    removeGame(s);
     print("removing a connection...");
     connections.remove(s);
 }
 
 void Server::print(QString text){
     ui->listWidget->addItem(text);
+}
+
+void Server::removeGame(QTcpSocket* s){
+    QByteArray ba;
+    QDataStream out(&ba, QIODevice::WriteOnly);
+    Game* g = connections[s];
+    if (g == nullptr) return;
+    if (g->otherSocket(s) != nullptr){
+        out << QChar('q');
+        g->otherSocket(s)->write(ba);
+    }
+    foreach (auto sock, g->spectators)
+        if (s == sock) return;
+    connections[g->socket[0]] = nullptr;
+    connections[g->socket[1]] = nullptr;
+    foreach (QTcpSocket* sock, g->spectators){
+        out << QChar('q');
+        sock->write(ba);
+        connections[sock] = nullptr;
+    }
+    gameList.removeOne(g);
+    delete g;
+    g = nullptr;
 }
 
 Server::~Server()
@@ -193,5 +208,6 @@ Server::~Server()
 
 QTcpSocket* Server::Game::otherSocket(QTcpSocket* socket){
     if (socket == Game::socket[0]) return Game::socket[1];
-    else return Game::socket[0];
+    else if (socket == Game::socket[1]) return Game::socket[0];
+    else return nullptr;
 }

@@ -26,6 +26,7 @@ private:
     Ui::Server *ui;
     class Game;
     void print(QString text);
+    void removeGame(QTcpSocket* s);
     QTcpServer* server = nullptr;
     QMap<QTcpSocket*, Game*> connections;
     QVector<Game*> gameList;
