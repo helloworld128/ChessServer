@@ -86,9 +86,14 @@ void Server::processData(){
         if (f.toLatin1() == 'f') connections[s]->oneReady = false;
         out << QChar('p') << x << y;
         connections[s]->otherSocket(s)->write(ba);
+<<<<<<< Updated upstream
         foreach (QTcpSocket* sock, connections[s]->spectators) {
             sock->write(ba);
         }
+=======
+        foreach (QTcpSocket* sock, connections[s]->spectators)
+            sock->write(ba);
+>>>>>>> Stashed changes
         break;
     }
     case 'w'://watch
