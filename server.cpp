@@ -146,6 +146,18 @@ void Server::processData(){
         gameList.removeOne(g);
         break;
     }
+    case 'u':
+    {
+        out << QChar('u');
+        connections[s]->otherSocket(s)->write(ba);
+        break;
+    }
+    case 'o':
+    {
+        out << QChar('o');
+        connections[s]->otherSocket(s)->write(ba);
+        break;
+    }
     case 't':
     {
         if (connections[s]->otherSocket(s) == nullptr) break;
